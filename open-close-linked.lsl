@@ -1,10 +1,10 @@
 // Open/close linked doors using time-based calculations.
 //
 
-#include "lib/debug.lsl"
-#include "lib/profiling.lsl"
-#include "door-script/lib/configure.lsl"
-#include "door-script/lib/messages.lsl"
+//#include "lib/debug.lsl"
+//#include "lib/profiling.lsl"
+//#include "door-script/lib/configure.lsl"
+//#include "door-script/lib/messages.lsl"
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -36,6 +36,17 @@ integer link_number;
 
 post_config()
 {
+}
+
+get_parameters(string config)
+{
+    configured = TRUE;
+
+    angle_multiplier = 1;
+    object_center = <0.13,0,0.012>;
+    open_time = 1.5;
+    open_angle = 110;
+    rotation_axis = <0,1,0.018>;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -77,7 +88,7 @@ move_door(integer is_opening)
         ++iterations;
     }
 
-    debug("Door movement iterations: " + (string)iterations);
+    //debug("Door movement iterations: " + (string)iterations);
 }
 
 move_door_finalize(vector target_position, rotation target_rotation)
@@ -93,7 +104,7 @@ move_door_finalize(vector target_position, rotation target_rotation)
 close_door_start()
 {
 
-    debug("The door is closing");
+    //debug("The door is closing");
     
     move_door(FALSE);
 }
@@ -110,15 +121,15 @@ open_door_start()
     closed_position = llGetLocalPos();
     closed_rotation = llGetLocalRot();
     open_position = closed_position;
-    debug("closed_position " + (string)(closed_position));
-    debug("closed_rotation " + (string)(closed_rotation));
+    //debug("closed_position " + (string)(closed_position));
+    //debug("closed_rotation " + (string)(closed_rotation));
 
     float angle = angle_multiplier * open_angle * DEG_TO_RAD;
     rotation q = llEuler2Rot(angle * rotation_axis);
     open_rotation = q * closed_rotation;
     open_position = position(angle);
     
-    debug("The door is opening");
+    //debug("The door is opening");
     move_door(TRUE);
 }
 
@@ -130,12 +141,6 @@ open_door_finalize()
 vector position(float angle)
 {
     rotation q = llEuler2Rot(angle * rotation_axis);
-    /*
-    vector op = object_center * q;
-    vector result = closed_position 
-        - op * closed_rotation
-        + object_center * closed_rotation;
-    */
     vector result = closed_position 
         + (object_center - object_center * q) * closed_rotation;
 
@@ -144,26 +149,10 @@ vector position(float angle)
 
 default // configuration
 {
-    link_message(integer sender_num, integer num, string str, key id)
-    {
-        if(num == OPENCLOSE_DOOR_CONTROL_MESSAGE)
-        {
-            if(str == OPENCLOSE_MESSAGE_CONFIG)
-            {
-                get_parameters(str);
-                if(configured)
-                {
-                    describe_configuration();
-                    state closed_state;
-                }
-            }
-        }
-    }
-
     state_entry()
     {
         llSetMemoryLimit(327268);
-        debug_prefix = llGetScriptName();
+        //debug_prefix = llGetScriptName();
         //DEBUG = DEBUG_STYLE_OWNER;
         
         // Copied from the wiki. Without this, the script throws errors.
@@ -173,61 +162,44 @@ default // configuration
         get_parameters(llGetObjectDesc());
         if(configured)
         {
-            describe_configuration();
+            //describe_configuration();
             state closed_state;
         }
-        else
-            debug("Not confugred.");
+        //else
+            //debug("Not confugred.");
     }
 }
 
 state closed_state
 {
-    link_message(integer sender_num, integer num, string str, key id)
-    {
-        if(num == OPENCLOSE_DOOR_CONTROL_MESSAGE)
-        {
-            if(str == OPENCLOSE_MESSAGE_CONFIG)
-                state default;
-            else if(str == OPENCLOSE_MESSAGE_TOUCH)
-            {
-                //start_profiling();
-                open_door_start();
-                open_door_finalize();
-                //stop_profiling();
-                state open_state;
-            }
-        }
-    }
-    
     state_entry()
     {
-        debug("The door is now closed.");
-        llListen(1, "", NULL_KEY, "");
+        //debug("The door is now closed.");
+    }
+    
+    touch_start(integer index)
+    {
+        //start_profiling();
+        open_door_start();
+        open_door_finalize();
+        //stop_profiling();
+        state open_state;
     }
 }
 
 state open_state
 {
-    link_message(integer sender_num, integer num, string str, key id)
-    {
-        if(num == OPENCLOSE_DOOR_CONTROL_MESSAGE)
-        {
-            if(str == OPENCLOSE_MESSAGE_CONFIG)
-                debug("Cannot be configured while open.");
-            else if(str == OPENCLOSE_MESSAGE_TOUCH)
-            {
-                //start_profiling();
-                close_door_start();
-                close_door_finalize();
-                //stop_profiling();
-                state closed_state;
-            }
-        }
-    }
-    
     state_entry()
     {
-        debug("The door is now open.");
+        //debug("The door is now open.");
+    }
+    
+    touch_start(integer index)
+    {
+        //start_profiling();
+        close_door_start();
+        close_door_finalize();
+        //stop_profiling();
+        state closed_state;
     }
 }
