@@ -1,7 +1,7 @@
 # Custom Coffin Door Script
 
 This is a modified version of a configurable door script 
-that is controlled by link messages. 
+that is controlled by link messages. This is now a stand-alone script.
 
 The link messages have been removed, 
 and the door operates by touch. 
