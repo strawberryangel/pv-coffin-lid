@@ -22,3 +22,16 @@ This requires knowledge of how to edit linked objects in SecondLife.
 1.  Set the script to "no modify" so that people won't be able to 
     mess with the script. 
     
+## Notes
+
+I've figured out the math error in the script. 
+The script works, as it is so no update will be made unless it's needed.
+
+If we need to redo the script, 
+it should be compiled and then new settings applied.
+Here are values that should be a close starting point: 
+
+```
+1 right out 110 1.5 <0,1,0> <0.125,0,0.04>
+```
+

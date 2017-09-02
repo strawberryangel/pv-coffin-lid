@@ -76,8 +76,13 @@ move_door(integer is_opening)
             angle = rotation_rate * current_time;
         else 
             angle = rotation_rate * (open_time - current_time);
-        rotation current_rotation = 
-            llEuler2Rot(angle * rotation_axis) * closed_rotation;
+            
+        // We have the axis of rotation and the angle. 
+        // Compose the quaternion that describes this rotation.
+        rotation q = llAxisAngle2Rot(rotation_axis, angle);
+        // Convert it to the local rotation 
+        // q' = closed_rotation * q  --- remember that SL reverses the operands.
+        rotation current_rotation = q * closed_rotation;
 
         llSetLinkPrimitiveParamsFast(link_number, [
             PRIM_ROT_LOCAL, current_rotation,
@@ -125,7 +130,7 @@ open_door_start()
     //debug("closed_rotation " + (string)(closed_rotation));
 
     float angle = angle_multiplier * open_angle * DEG_TO_RAD;
-    rotation q = llEuler2Rot(angle * rotation_axis);
+    rotation q = llAxisAngle2Rot(rotation_axis, angle);
     open_rotation = q * closed_rotation;
     open_position = position(angle);
     
@@ -140,7 +145,7 @@ open_door_finalize()
 
 vector position(float angle)
 {
-    rotation q = llEuler2Rot(angle * rotation_axis);
+    rotation q = llAxisAngle2Rot(rotation_axis, angle);
     vector result = closed_position 
         + (object_center - object_center * q) * closed_rotation;
 
